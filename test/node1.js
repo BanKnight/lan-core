@@ -8,6 +8,14 @@ module.exports = (node, ...args) =>
         {
             continue
         }
-    }
 
+        switch (packet.proto)
+        {
+            case "sys":
+                handle_sys(node, packet)
+                break
+        }
+    }
 }
+
+
