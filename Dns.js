@@ -2,8 +2,14 @@ module.exports = class Dns
 {
     constructor(lan, options)
     {
+        this.lan = lan
         this.options = options
         this.statics = {}
+    }
+
+    start()
+    {
+
     }
 
     /**

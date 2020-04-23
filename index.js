@@ -1,43 +1,58 @@
 const path = require("path")
+const shortid = require("shortid").generate
 const extend = require("extend2")
 
-const default_config = require("./default_config")
+const config = require("./config")
+
+const Dhcp = require("./Dhcp")
+const Dns = require("./Dns")
+const Loader = require("./Loader")
+
+const Node = require("./Node")
 
 module.exports = class Lan
 {
-    constructor(config)
+    constructor(options)
     {
-        this.config = extend(true, {}, default_config, config);
+        this.config = extend(true, {}, config, options);
 
         this.dhcp = null
         this.dns = null
+        this.loader = null
 
-        this.nodes = {}
+        this.nodes = {}                             //[node.id] = node
+        this.addresses = {}                         //[node.address] = node
     }
 
     async start()
     {
-        await this._try_load_dhcp()
-        await this._try_load_dns()
+        await this._init_dhcp()
+        await this._init_dns()
+        await this._init_loader()
 
+        await this.dhcp.start()
+        await this.dns.start()
     }
 
-    async new_node(info,...args)
+    async new_node(info, ...args)
     {
-        const node = { ...info,lan:this,args:args }
+        const meta = JSON.parse(JSON.stringify(info))
+        const node = new Node(this, meta)
 
-        if (info.id == null)
-        {
-            await this.dhcp.regist(node)
-        }
+        meta.address = meta.address || shortid()
+        meta.args = args
+
+        await this.dhcp.regist(node)
 
         this.nodes[node.id] = node
+        this.nodes[node.address] = node
 
-        const whole_path = path.resolve(this.config.search,info.template)
+        const func = this.loader(meta.template)
 
-        const func = require(whole_path)
-
-        await func(node,...args)
+        setImmediate(() =>
+        {
+            func(node, ...args)
+        })
 
         return node.id
     }
@@ -47,39 +62,59 @@ module.exports = class Lan
 
     }
 
-    _try_load_dhcp()
+    _init_dhcp()
     {
-        const whole_path = path.resolve(this.config.search,"dhcp")
+        const whole_path = path.resolve(this.config.search, "Dhcp")
 
         try
         {
             const third = require(whole_path)
 
-            this.dhcp = new third(this,this.config.dhcp)
+            this.dhcp = new third(this, this.config.dhcp)
         }
-        catch(e)
+        catch (e)
         {
             console.log("dhcp is not exists,use default dhcp")
+
+            this.dhcp = new Dhcp(this, this.config.dhcp)
         }
     }
 
-    _try_load_dns()
+    _init_dns()
     {
-        const whole_path = path.resolve(this.config.search,"dns")
+        const whole_path = path.resolve(this.config.search, "Dns")
 
         try
         {
             const third = require(whole_path)
 
-            this.dns = new third(this,this.config.dns)
+            this.dns = new third(this, this.config.dns)
         }
-        catch(e)
+        catch (e)
         {
+            this.dns = new Dns(this, this.config.dns)
+
             console.log("dns is not exists,use default dns")
         }
     }
 
-  
+    _init_loader()
+    {
+        const whole_path = path.resolve(this.config.search, "Loader")
+
+        try
+        {
+            const third = require(whole_path)
+
+            this.loader = new third(this, this.config.loader)
+        }
+        catch (e)
+        {
+            this.loader = new Loader(this, this.config.loader)
+
+            console.log("loader is not exists,use default loader")
+        }
+    }
 }
 
 

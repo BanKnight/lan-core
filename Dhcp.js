@@ -1,27 +1,37 @@
+const extend = require("extend2")
+
 const default_options = {
     statics: {},                                    //静态主机,[address] = ip
 }
 
 module.exports = class Dhcp
 {
-    constructor(lan, options = default_options)
+    constructor(lan, options = {})
     {
         this.lan = lan
-        this.helper = 0
+        this.options = extend(true, {}, default_options, options);
 
-        this.id = options.id || "lan"                               //本方地址
-        this.nodes = {}                                             //当前分配：[id] = address/true
-        this.statics = Object.assign({}, options.statics || {})     //静态主机：[address] = ip
+        this.id = this.options.id || "lan"                          //本方地址
+        this.statics = this.options.statics                         //静态主机：[address] = ip
+
+        this.helper = 0
+        this.nodes = {}                                             //当前分配：[id] = address
+    }
+
+    start()
+    {
+
     }
 
     async regist(node)
     {
         if (node.id)
         {
-            this.nodes[node.id] = true
+            this.nodes[node.id] = node.address
             return
         }
-        else if (node.address)              //看看是否有静态地址
+
+        if (node.address)              //看看是否有静态地址
         {
             node.id = this.statics[node.address]
         }
@@ -38,19 +48,13 @@ module.exports = class Dhcp
             }
 
             node.id = id
-            break
         }
 
-        this.nodes[node.id] = true
+        this.nodes[node.id] = node.address
     }
 
     async unregist(id)
     {
-        let address_or_true = this.nodes[id]
-
-        if (address_or_true === true)
-        {
-            delete this.nodes[id]
-        }
+        delete this.nodes[id]
     }
 }
