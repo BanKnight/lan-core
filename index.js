@@ -42,12 +42,15 @@ module.exports = class Lan
         meta.address = meta.address || shortid()
         meta.args = args
 
-        await this.dhcp.regist(node)
+        if (node.id == null)
+        {
+            await this.dhcp.regist(node)
+        }
 
         this.nodes[node.id] = node
         this.nodes[node.address] = node
 
-        const func = this.loader(meta.template)
+        const func = this.loader.load(meta.template)
 
         setImmediate(() =>
         {
@@ -55,6 +58,49 @@ module.exports = class Lan
         })
 
         return node.id
+    }
+
+    soft_off(id)
+    {
+        const node = this.nodes[id]
+
+        if (node == null)
+        {
+            return false
+        }
+
+        node.soft_off()
+    }
+
+    send(msg)
+    {
+        const is_same_network = this.dhcp.is_same(msg.to)
+        if (is_same_network == true)
+        {
+            const node = this.nodes[msg.to]
+            if (node == null)
+            {
+                return false
+            }
+
+            node.push(msg)
+
+            return
+        }
+
+        const gateway_id = this.dhcp.id
+
+        const node = this.nodes[gateway_id]
+
+        if (node == null)
+        {
+            return false
+        }
+
+        node.push({
+            method: "t",         //t as transform
+            body: msg
+        })
     }
 
     stop()

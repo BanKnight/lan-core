@@ -10,6 +10,8 @@ module.exports = class Loader
 
     load(template)
     {
-        return require(path.resolve(lan.config.search, template))
+        const whole = path.resolve(this.lan.config.search, template)
+
+        return require(whole)
     }
 }

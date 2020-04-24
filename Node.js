@@ -1,14 +1,14 @@
-module.exports = class Node
+const Queue = require("./Queue")
+
+module.exports = class Node extends Queue
 {
     constructor(lan, meta)
     {
+        super(lan, meta)
         this.lan = lan
         this.meta = meta
 
-        this.msgs = []
-        this.waitings = []
-
-        this.want_dead = false
+        this.soft_dead = false
         this.dead = false
     }
 
@@ -32,14 +32,6 @@ module.exports = class Node
         this.meta.address = val
     }
 
-    async recv()
-    {
-        return new Promise((resolve, reject) =>
-        {
-            this.waitings.push(resolve)
-        })
-    }
-
     async send(packet)
     {
         packet.from = packet.from || this.id
@@ -47,24 +39,9 @@ module.exports = class Node
         this.lan.send(packet)
     }
 
-    push(msg)
-    {
-        this.msgs.push(msg)
-
-        const loop = Math.min(this.msgs.length, this.waitings.length)
-
-        for (let i = 0; i < loop; ++i)
-        {
-            let first = this.msgs.shift()
-            let wake = this.waitings.shift()
-
-            wake(first)
-        }
-    }
-
     get alive()
     {
-        return this.dead != true || (this.want_dead && this.msgs.length == 0)
+        return this.dead != true || (this.soft_dead && this.msgs.length == 0)
     }
 
     /**
@@ -73,7 +50,7 @@ module.exports = class Node
      */
     soft_off()
     {
-        this.want_dead = true
+        this.soft_dead = true
 
         //Todo tell lan to check if delete this node
     }

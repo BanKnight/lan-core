@@ -23,6 +23,14 @@ module.exports = class Dhcp
 
     }
 
+    /**
+     * 判断是否相同网络
+     */
+    is_same(id)
+    {
+        return id.indexOf(this.id) == 0
+    }
+
     async regist(node)
     {
         if (node.id)
