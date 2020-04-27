@@ -90,6 +90,18 @@ module.exports = class Lan
         node.hard_off()
     }
 
+    remove_node(id)
+    {
+        const node = this.nodes[id]
+        if (node == null)
+        {
+            return
+        }
+
+        delete this.nodes[id]
+        delete this.addresses[node.address]
+    }
+
     send(msg)
     {
         const is_same_network = this.dhcp.is_same(msg.to)

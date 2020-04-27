@@ -80,7 +80,9 @@ module.exports = class Node extends Queue
             return
         }
 
-        
+        this.dead = true
+
+        this.lan.remove_node(this.id)
     }
 
 }
