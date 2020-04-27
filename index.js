@@ -107,13 +107,13 @@ module.exports = class Lan
         const is_same_network = this.dhcp.is_same(msg.to)
         if (is_same_network == true)
         {
-            const gateway = this.nodes[msg.to]
-            if (gateway == null)
+            const node = this.nodes[msg.to]
+            if (node == null)
             {
                 return false
             }
 
-            gateway.push(msg)
+            node.push(msg)
 
             return
         }

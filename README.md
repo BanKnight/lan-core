@@ -1,1 +1,1 @@
-# queen-core
+# lan-core
