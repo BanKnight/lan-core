@@ -5,6 +5,7 @@ module.exports = class Queue
         this.msgs = []
         this.waitings = []
     }
+
     push(msg)
     {
         this.msgs.push(msg)
@@ -31,15 +32,5 @@ module.exports = class Queue
         {
             this.waitings.push(resolve)
         })
-    }
-
-    close()
-    {
-        for (let i = 0, loop = this.waitings.length; i < loop; ++i)
-        {
-            let wake = this.waitings.shift()
-
-            wake()
-        }
     }
 }

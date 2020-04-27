@@ -9,6 +9,7 @@ module.exports = class Node extends Queue
         this.meta = meta
 
         this.soft_dead = false
+        this.hard_dead = false
         this.dead = false
     }
 
@@ -41,18 +42,23 @@ module.exports = class Node extends Queue
 
     get alive()
     {
-        return this.dead != true || (this.soft_dead && this.msgs.length == 0)
+        return this.hard_dead != true || (this.soft_dead && this.msgs.length == 0)
     }
 
     /**
      * 软关闭：消息处理完就退出
-     * 
+     * 需要调用方调用confirm_dead
      */
     soft_off()
     {
         this.soft_dead = true
 
-        //Todo tell lan to check if delete this node
+        if (this.msgs.length > 0)
+        {
+            return
+        }
+
+        this.push(new Error("closed"))
     }
 
     /**
@@ -60,14 +66,21 @@ module.exports = class Node extends Queue
      */
     hard_off()
     {
-        this.dead = true
+        this.hard_dead = true
 
-        let wake = this.waitings.shift()
+        this.push(new Error("closed"))
 
-        wake && wake()
-
-        //Todo tell lan to delete this node
+        setImmediate(this.confirm_dead)
     }
 
+    confirm_dead()
+    {
+        if (this.dead)
+        {
+            return
+        }
+
+        
+    }
 
 }

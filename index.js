@@ -55,12 +55,17 @@ module.exports = class Lan
 
         setImmediate(() =>
         {
-            func(node, ...meta.args)
+            func.call(node, ...meta.args)
         })
 
         return node.id
     }
 
+    /**
+     * 软关闭：所有消息处理完后，node.alive 为false
+     * 调用方需要调用confirm_dead
+     * @param {要关闭的节点} id 
+     */
     soft_off(id)
     {
         const node = this.nodes[id]
@@ -71,6 +76,18 @@ module.exports = class Lan
         }
 
         node.soft_off()
+    }
+
+    hard_off(id)
+    {
+        const node = this.nodes[id]
+
+        if (node == null)
+        {
+            return false
+        }
+
+        node.hard_off()
     }
 
     send(msg)
