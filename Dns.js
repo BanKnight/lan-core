@@ -28,6 +28,6 @@ module.exports = class Dns
      */
     async resolve(name)
     {
-
+        return this.statics[name]
     }
 }

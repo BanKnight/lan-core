@@ -11,7 +11,7 @@ module.exports = async (node, ...args) =>
             continue
         }
 
-        console.log(node.id, "recv msg from", msg.from, msg.method, body.toString())
+        console.log(node.id, "recv msg from", msg.from, msg.method, msg.body)
 
         if (msg.method == "add")
         {

@@ -12,10 +12,9 @@ module.exports = class Dhcp
         this.options = extend(true, {}, default_options, options);
 
         this.id = this.options.id || "lan"                          //本方地址
-        this.statics = this.options.statics                         //静态主机：[address] = ip
-
-        this.helper = 0
+                               
         this.nodes = {}                                             //当前分配：[id] = address
+        this.addresses = {}                                         //静态主机：[address] = id
     }
 
     start()
@@ -31,38 +30,37 @@ module.exports = class Dhcp
         return id.indexOf(this.id) == 0
     }
 
-    async regist(node)
+    async regist(address)
     {
-        if (node.id)
+        let id = this.options.statics[address]
+
+        if(id == null)
         {
-            this.nodes[node.id] = node.address
-            return
+            id = this.addresses[address]          //相同地址，尽可能分配到同样的id
         }
 
-        if (node.address)              //看看是否有静态地址
+        if(id == null)
         {
-            node.id = this.statics[node.address]
+            id = `${this.id}.${address}`
         }
 
-        while (node.id == null)
-        {
-            this.helper++
+        this.nodes[id] = address
+        this.addresses[address] = id
 
-            const id = `${this.id}.${this.helper}`
-
-            if (this.nodes[id])
-            {
-                continue
-            }
-
-            node.id = id
-        }
-
-        this.nodes[node.id] = node.address
+        return id
     }
 
     async unregist(id)
     {
+        const address = this.nodes[id]
+
+        if(address == null)
+        {
+            return
+        }
+
         delete this.nodes[id]
+        delete this.addresses[address]
     }
+
 }

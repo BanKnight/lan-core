@@ -44,7 +44,7 @@ module.exports = class Lan
 
         if (node.id == null)
         {
-            await this.dhcp.regist(node)
+            node.id = await this.dhcp.regist(meta.address)
         }
 
         this.nodes[node.id] = node

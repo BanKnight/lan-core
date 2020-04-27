@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "extend2": "^1.0.0"
+    "extend2": "^1.0.0",
+    "shortid": "^2.2.15"
   }
 }
