@@ -34,13 +34,14 @@ module.exports = class Lan
         await this.dns.start()
     }
 
-    async new_node(info, ...args)
+    async new_node(info)
     {
         const meta = JSON.parse(JSON.stringify(info))
-        const node = new Node(this, meta)
 
         meta.address = meta.address || shortid()
-        meta.args = args
+        meta.args = meta.args || []
+
+        const node = new Node(this, meta)
 
         if (node.id == null)
         {
@@ -54,7 +55,7 @@ module.exports = class Lan
 
         setImmediate(() =>
         {
-            func(node, ...args)
+            func(node, ...meta.args)
         })
 
         return node.id
@@ -77,27 +78,27 @@ module.exports = class Lan
         const is_same_network = this.dhcp.is_same(msg.to)
         if (is_same_network == true)
         {
-            const node = this.nodes[msg.to]
-            if (node == null)
+            const gateway = this.nodes[msg.to]
+            if (gateway == null)
             {
                 return false
             }
 
-            node.push(msg)
+            gateway.push(msg)
 
             return
         }
 
         const gateway_id = this.dhcp.id
 
-        const node = this.nodes[gateway_id]
+        const gateway = this.nodes[gateway_id]
 
-        if (node == null)
+        if (gateway == null)
         {
             return false
         }
 
-        node.push({
+        gateway.push({
             method: "t",         //t as transform
             body: msg
         })
