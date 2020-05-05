@@ -4,7 +4,7 @@ module.exports = class Node extends Queue
 {
     constructor(lan, meta)
     {
-        super(lan, meta)
+        super()
         this.lan = lan
         this.meta = meta
 

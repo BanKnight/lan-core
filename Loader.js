@@ -10,7 +10,7 @@ module.exports = class Loader
 
     load(template)
     {
-        const whole = path.resolve(this.lan.config.search, template)
+        const whole = path.resolve(this.options.search, template)
 
         return require(whole)
     }

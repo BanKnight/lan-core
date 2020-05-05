@@ -1,29 +1,29 @@
-module.exports = async function (...args)
+module.exports = async (node, ...args) =>
 {
-    console.log(this.id, "start ", ...args)
+    console.log(node.id, "start ", ...args)
 
-    while (this.alive)
+    while (node.alive)
     {
-        const msg = await this.pop()
+        const msg = await node.pop()
 
         if (msg instanceof Error)
         {
             continue
         }
 
-        console.log(this.id, "recv msg from", msg.from, msg.method, msg.body)
+        console.log(node.id, "recv msg from", msg.from, msg.method, msg.body)
 
         if (msg.method == "add")
         {
-            this.send({
+            node.send({
                 to: msg.body,
                 method: "ping",
-                body: `hello from ${this.id}`
+                body: `hello from ${node.id}`
             })
         }
     }
 
-    this.confirm_dead()
+    node.confirm_dead()
 }
 
 

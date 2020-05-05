@@ -7,7 +7,6 @@ const config = require("./config")
 const Dhcp = require("./Dhcp")
 const Dns = require("./Dns")
 const Loader = require("./Loader")
-
 const Node = require("./Node")
 
 module.exports = class Lan
@@ -41,7 +40,8 @@ module.exports = class Lan
         meta.address = meta.address || shortid()
         meta.args = meta.args || []
 
-        const node = new Node(this, meta)
+        const NodeClass = this.config.Node || Node
+        const node = new NodeClass(this, meta)
 
         if (node.id == null)
         {
@@ -140,56 +140,23 @@ module.exports = class Lan
 
     _init_dhcp()
     {
-        const whole_path = path.resolve(this.config.search, "Dhcp")
+        let Class = this.config.Dhcp || Dhcp
 
-        try
-        {
-            const third = require(whole_path)
-
-            this.dhcp = new third(this, this.config.dhcp)
-        }
-        catch (e)
-        {
-            console.log("dhcp is not exists,use default dhcp")
-
-            this.dhcp = new Dhcp(this, this.config.dhcp)
-        }
+        this.dhcp = new Class(this, this.config.dhcp)
     }
 
     _init_dns()
     {
-        const whole_path = path.resolve(this.config.search, "Dns")
+        let Class = this.config.Dns || Dns
 
-        try
-        {
-            const third = require(whole_path)
-
-            this.dns = new third(this, this.config.dns)
-        }
-        catch (e)
-        {
-            this.dns = new Dns(this, this.config.dns)
-
-            console.log("dns is not exists,use default dns")
-        }
+        this.dns = new Class(this, this.config.dns)
     }
 
     _init_loader()
     {
-        const whole_path = path.resolve(this.config.search, "Loader")
+        let Class = this.config.Loader || Loader
 
-        try
-        {
-            const third = require(whole_path)
-
-            this.loader = new third(this, this.config.loader)
-        }
-        catch (e)
-        {
-            this.loader = new Loader(this, this.config.loader)
-
-            console.log("loader is not exists,use default loader")
-        }
+        this.loader = new Class(this, this.config.loader)
     }
 }
 

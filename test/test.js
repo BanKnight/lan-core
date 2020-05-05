@@ -3,7 +3,9 @@ const Lan = require("../index")
 async function main()
 {
     const lan = new Lan({
-        search: "./test",
+        loader: {
+            search: __dirname,
+        }
     })
 
     await lan.start()
