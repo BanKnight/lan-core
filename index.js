@@ -11,10 +11,8 @@ const Node = require("./Node")
 
 module.exports = class Lan
 {
-    constructor(options)
+    constructor()
     {
-        this.config = extend(true, {}, config, options);
-
         this.dhcp = null
         this.dns = null
         this.loader = null
@@ -23,12 +21,17 @@ module.exports = class Lan
         this.addresses = {}                         //[node.address] = node
     }
 
-    async start()
+    async init(options)
     {
+        this.config = extend(true, {}, config, options);
+
         await this._init_dhcp()
         await this._init_dns()
         await this._init_loader()
+    }
 
+    async start()
+    {
         await this.dhcp.start()
         await this.dns.start()
     }
@@ -138,6 +141,11 @@ module.exports = class Lan
 
     }
 
+    uninit()
+    {
+
+    }
+
     _init_dhcp()
     {
         let Class = this.config.Dhcp || Dhcp
@@ -159,21 +167,6 @@ module.exports = class Lan
         this.loader = new Class(this, this.config.loader)
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
